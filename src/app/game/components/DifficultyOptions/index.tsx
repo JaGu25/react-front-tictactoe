@@ -1,4 +1,7 @@
 import clsx from "clsx";
+import buttonSoundSrc from "@/assets/sounds/button-sound.mp3";
+import { usePlaySound } from "@/app/game/hooks/usePlaySound";
+import { useGameStore } from "@/store/game/game.store";
 
 interface Props {
   profileImg: string;
@@ -15,8 +18,19 @@ const DifficultyOptions: React.FC<Props> = ({
   bgColor,
   onClick,
 }) => {
+  const { playAudio } = usePlaySound({ src: buttonSoundSrc });
+  const isSoundActivate = useGameStore((state) => state.isSoundActivate);
+
   return (
-    <div onClick={onClick} className="relative flex items-center">
+    <div
+      onClick={() => {
+        if (onClick) {
+          isSoundActivate && playAudio();
+          onClick();
+        }
+      }}
+      className="relative flex items-center animate-shake"
+    >
       <img
         src={profileImg}
         className={clsx(
