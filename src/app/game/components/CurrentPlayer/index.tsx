@@ -24,7 +24,7 @@ const CurrentPlayer: React.FC<Props> = ({ active, playerName, fillOption }) => {
         height={60}
         className="bg-green-400 rounded-full"
       />
-      <p className="text-white font-bold text-xl">{playerName}</p>
+      <p className="text-white font-bold text-lg">{playerName}</p>
       {fillOption}
     </div>
   );

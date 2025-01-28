@@ -1,5 +1,5 @@
 import Button from "@/app/game/components/Button";
-import { useGameStore } from "@/store/game/game.store";
+import { GameMode, useGameStore } from "@/store/game/game.store";
 import clsx from "clsx";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import robotAnimated from "@/assets/animation/robot-saying-hello.lottie";
@@ -12,6 +12,12 @@ const HomePage = () => {
   const navigate = useNavigate();
   const isSoundActivate = useGameStore((state) => state.isSoundActivate);
   const toggleMusic = useGameStore((state) => state.toggleMusic);
+  const selectGameMode = useGameStore((state) => state.selectGameMode);
+
+  const onClickGameMode = (gameMode: GameMode, to: string) => {
+    selectGameMode(gameMode);
+    navigate(to);
+  };
 
   return (
     <div className="flex flex-col justify-between h-full pt-4">
@@ -36,11 +42,24 @@ const HomePage = () => {
         })}
       </div>
       <div className="flex flex-col mt-4 gap-6 animate-jump-in animate-once animate-duration-500">
-        <Button variant="1" onClick={() => navigate("/difficulty")}>
+        <Button
+          variant="1"
+          onClick={() => onClickGameMode("single", "/difficulty")}
+        >
           Single Player
         </Button>
-        <Button variant="2">Multiplayer</Button>
-        <Button variant="3">Local Multiplayer</Button>
+        <Button
+          variant="2"
+          onClick={() => onClickGameMode("multiplayer", "/difficulty")}
+        >
+          Multiplayer
+        </Button>
+        <Button
+          variant="3"
+          onClick={() => onClickGameMode("local", "/board-game")}
+        >
+          Local Multiplayer
+        </Button>
       </div>
       <div className="flex justify-center gap-2">
         {isSoundActivate ? (

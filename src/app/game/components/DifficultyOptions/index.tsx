@@ -22,33 +22,35 @@ const DifficultyOptions: React.FC<Props> = ({
   const isSoundActivate = useGameStore((state) => state.isSoundActivate);
 
   return (
-    <div
-      onClick={() => {
-        if (onClick) {
-          isSoundActivate && playAudio();
-          onClick();
-        }
-      }}
-      className="relative flex items-center animate-shake"
-    >
-      <img
-        src={profileImg}
-        className={clsx(
-          "w-[140px] h-[140px] rounded-full -bottom-[30px] -mr-[50px] z-10",
-          `bg-${circleColor}`,
-        )}
-      />
+    <div className="animate-shake">
       <div
-        className={clsx(
-          "text-left",
-          "text-white font-bold text-2xl tracking-wide",
-          "w-[260px]",
-          "py-6 rounded-full border-[3px]",
-          `border-${circleColor}`,
-          bgColor,
-        )}
+        onClick={() => {
+          if (onClick) {
+            isSoundActivate && playAudio();
+            onClick();
+          }
+        }}
+        className="relative flex items-center duration-300 hover:scale-110"
       >
-        <span className="ml-[60px]">{text}</span>
+        <img
+          src={profileImg}
+          className={clsx(
+            "w-[140px] h-[140px] rounded-full -bottom-[30px] -mr-[50px] z-10",
+            `bg-${circleColor}`,
+          )}
+        />
+        <div
+          className={clsx(
+            "text-left",
+            "text-white font-bold text-2xl tracking-wide",
+            "w-[260px]",
+            "py-6 rounded-full border-[3px]",
+            `border-${circleColor}`,
+            bgColor,
+          )}
+        >
+          <span className="ml-[60px]">{text}</span>
+        </div>
       </div>
     </div>
   );
