@@ -18,7 +18,7 @@ export function LoadingButton({
       className={cn(
         "relative",
         isLoading && "cursor-not-allowed opacity-70",
-        className
+        className,
       )}
       disabled={isLoading}
       {...props}

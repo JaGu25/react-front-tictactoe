@@ -5,6 +5,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import robotAnimated from "@/assets/animation/robot-saying-hello.lottie";
 import { Volume2, VolumeOff } from "lucide-react";
 import { useNavigate } from "react-router";
+import GameService from "@/app/game/services/game.service";
 
 const tictactoeTitle = ["T", "I", "C", "T", "A", "C", "T", "O", "E"];
 
@@ -14,9 +15,18 @@ const HomePage = () => {
   const toggleMusic = useGameStore((state) => state.toggleMusic);
   const selectGameMode = useGameStore((state) => state.selectGameMode);
 
-  const onClickGameMode = (gameMode: GameMode, to: string) => {
-    selectGameMode(gameMode);
-    navigate(to);
+  const onClickGameMode = async (gameMode: GameMode, to: string) => {
+    try {
+      let navegateTo = to;
+      if (gameMode === "multiplayer") {
+        const { id } = await GameService.generateRoom();
+        navegateTo = `${to}?id=${id}`;
+      }
+      selectGameMode(gameMode);
+      navigate(navegateTo);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -50,7 +60,7 @@ const HomePage = () => {
         </Button>
         <Button
           variant="2"
-          onClick={() => onClickGameMode("multiplayer", "/difficulty")}
+          onClick={() => onClickGameMode("multiplayer", "/board-game")}
         >
           Multiplayer
         </Button>

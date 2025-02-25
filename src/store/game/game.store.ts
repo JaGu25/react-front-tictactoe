@@ -58,11 +58,13 @@ export const valuesToCheck = [
 const gameStateBoardInitial: TicTacToeGameBoard = {
     currentStatus: "in-progress",
     gameMode: 'local',
-    playerOne: {
-        name: "",
-    },
-    playerTwo: {
-        name: ""
+    players: {
+        playerOne: {
+            name: "",
+        },
+        playerTwo: {
+            name: ""
+        },
     },
     gameState: structuredClone(initialGameState),
     playerTurn: "ONE"
@@ -72,8 +74,10 @@ export type PlayerTurn = "ONE" | "TWO"
 
 export interface TicTacToeGameBoard {
     gameMode: GameMode;
-    playerOne: Player | undefined;
-    playerTwo: Player | undefined;
+    players: {
+        playerOne: Player | undefined;
+        playerTwo: Player | undefined;
+    }
     gameState: string[][];
     playerTurn: PlayerTurn;
     currentStatus: GameCurrentStatus
@@ -99,7 +103,7 @@ export interface GameState {
 }
 
 export const storeApi: StateCreator<GameState> = (set, get) => ({
-    isSoundActivate: true,
+    isSoundActivate: false,
     botDifficulty: "easy",
     gameStateBoard: gameStateBoardInitial,
     setInitialGameState: (gameBoardState: TicTacToeGameBoard) => {
@@ -124,10 +128,16 @@ export const storeApi: StateCreator<GameState> = (set, get) => ({
         set({ gameStateBoard: { ...get().gameStateBoard, playerTurn } })
     },
     resetGameState: () => {
-        console.log(gameStateBoardInitial)
-        set({ gameStateBoard: gameStateBoardInitial })
-    }
+        const currentPlayers = get().gameStateBoard.players;
 
+        set({
+            gameStateBoard: {
+                ...gameStateBoardInitial,
+                gameState: initialGameState,
+                players: currentPlayers
+            }
+        })
+    }
 })
 
 export const useGameStore = create<GameState>()(

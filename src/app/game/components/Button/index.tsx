@@ -1,6 +1,3 @@
-import { usePlaySound } from "@/app/game/hooks/usePlaySound";
-import buttonSoundSrc from "@/assets/sounds/button-sound.mp3";
-import { useGameStore } from "@/store/game/game.store";
 import clsx from "clsx";
 import React, { PropsWithChildren } from "react";
 
@@ -10,9 +7,6 @@ interface Props extends PropsWithChildren {
 }
 
 const Button: React.FC<Props> = ({ children, variant, onClick }) => {
-  const { playAudio } = usePlaySound({ src: buttonSoundSrc });
-  const isSoundActivate = useGameStore((state) => state.isSoundActivate);
-
   const bgButton = () => {
     switch (variant) {
       case "1":
@@ -26,12 +20,7 @@ const Button: React.FC<Props> = ({ children, variant, onClick }) => {
 
   return (
     <button
-      onClick={() => {
-        if (onClick) {
-          isSoundActivate && playAudio();
-          onClick();
-        }
-      }}
+      onClick={onClick}
       type="button"
       className={clsx(
         "text-white font-bold text-2xl tracking-wide",

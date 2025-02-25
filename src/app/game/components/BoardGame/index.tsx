@@ -1,52 +1,31 @@
 import CardOption from "@/app/game/components/BoardGame/CardOption";
 import CurrentPlayer from "@/app/game/components/CurrentPlayer";
 import {
-  initialGameState,
   PlayerTurn,
   useGameStore,
   valuesToCheck,
 } from "@/store/game/game.store";
 import { Circle, RefreshCcw, X } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import { useEffect } from "react";
+import { useSocketContext } from "@/shared/providers/SocketProvider";
 
 const BoardGame = () => {
+  const { sendMessage } = useSocketContext();
   const {
-    gameMode,
     playerTurn,
     gameState,
     currentStatus,
-    playerOne,
-    playerTwo,
+    players: { playerOne, playerTwo },
   } = useGameStore((state) => state.gameStateBoard);
   const {
-    setInitialGameState,
     updateGameState,
     updatePlayerTurn,
     resetGameState,
     updateGameCurrentStatus,
   } = useGameStore(useShallow((state) => state));
 
-  useEffect(() => {
-    if (gameMode === "local") {
-      setInitialGameState({
-        gameMode,
-        playerOne: {
-          name: "Player One",
-        },
-        playerTwo: {
-          name: "Player Two",
-        },
-        gameState: structuredClone(initialGameState),
-        playerTurn: "ONE",
-        currentStatus: "in-progress",
-      });
-    } else if (gameMode === "single") {
-    } else {
-    }
-  }, []);
-
   const handleClickCardOption = ({ X, Y }: { X: number; Y: number }) => {
+    sendMessage("ping", { client: "Hola" });
     gameState[Y][X] = playerTurn;
     updateGameState(gameState);
     checkIsGameOver(playerTurn);
@@ -75,7 +54,6 @@ const BoardGame = () => {
     if (currentStatus === "done") {
       return `Ganador ${playerTurn === "ONE" ? playerOne?.name : playerTwo?.name}`;
     }
-
     if (currentStatus === "draw") {
       return "Empate !";
     }
@@ -102,7 +80,8 @@ const BoardGame = () => {
               <CardOption
                 key={value + indexY}
                 onClick={() => {
-                  if (currentStatus === "in-progress") {
+                  const isNotSelected = Boolean(!gameState[indexY][indexX]);
+                  if (currentStatus === "in-progress" && isNotSelected) {
                     handleClickCardOption({ X: indexX, Y: indexY });
                   }
                 }}

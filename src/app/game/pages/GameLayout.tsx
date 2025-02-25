@@ -5,6 +5,8 @@ import { usePlaySound } from "@/app/game/hooks/usePlaySound";
 import bgSound from "@/assets/sounds/bg-music.mp3";
 import { useEffect } from "react";
 import { useGameStore } from "@/store/game/game.store";
+import { SocketProvider } from "@/shared/providers/SocketProvider";
+import { ButtonSoundProvider } from "@/shared/providers/ButtonSoundProvider";
 
 const GameLayout = () => {
   const isSoundActivate = useGameStore((state) => state.isSoundActivate);
@@ -13,11 +15,7 @@ const GameLayout = () => {
   const showNavegation = "/" !== location.pathname;
 
   useEffect(() => {
-    if (isSoundActivate) {
-      playAudio();
-    } else {
-      pauseAudio();
-    }
+    isSoundActivate ? playAudio() : pauseAudio();
   }, [isSoundActivate]);
 
   return (
@@ -28,7 +26,14 @@ const GameLayout = () => {
       <div className="game-container w-full md:w-[460px] h-full p-8 relative">
         <div className="z-10 h-full w-full tracking-wide">
           {showNavegation && <Navegation />}
-          <Outlet />
+          <ButtonSoundProvider>
+            <SocketProvider
+              url={import.meta.env.VITE_APP_SOCKET_URL!}
+              roomId="test"
+            >
+              <Outlet />
+            </SocketProvider>
+          </ButtonSoundProvider>
         </div>
       </div>
     </div>
