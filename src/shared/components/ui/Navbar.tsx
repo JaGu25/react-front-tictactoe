@@ -1,4 +1,3 @@
-import { Input } from "@/shared/components/shadcn/input";
 import {
   Sheet,
   SheetContent,
@@ -7,13 +6,7 @@ import {
 import SidebarRoutes from "@/shared/components/ui/SidebarRoutes";
 import ToggleTheme from "@/shared/components/ui/ToggleTheme";
 import UserOptions from "@/shared/components/ui/UserOptions";
-import {
-  DotIcon,
-  Menu,
-  MoreHorizontal,
-  MoreHorizontalIcon,
-  Search,
-} from "lucide-react";
+import { Menu } from "lucide-react";
 
 const Navbar = () => {
   return (

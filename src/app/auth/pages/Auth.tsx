@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router";
-import bgLogin from "@/assets/images/bg-login.png";
+import bgLogin from "@/assets/images/bg-login.webp";
 import { useAuthStore } from "@/store/auth/auth.store";
 
 const Auth = () => {

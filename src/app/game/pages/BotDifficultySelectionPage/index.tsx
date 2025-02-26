@@ -1,5 +1,7 @@
 import DifficultyOptions from "@/app/game/components/DifficultyOptions";
 import botProfileSvg from "@/assets/images/bot-profile.svg";
+import botProfileSvg2 from "@/assets/images/bot-profile2.svg";
+import botProfileSvg3 from "@/assets/images/bot-profile3.svg";
 import { BotDifficulty, useGameStore } from "@/store/game/game.store";
 import { useNavigate } from "react-router";
 
@@ -13,14 +15,14 @@ const difficultyOptions = [
   },
   {
     difficulty: "medium",
-    profileImg: botProfileSvg,
+    profileImg: botProfileSvg2,
     text: "Medium Bot",
     bgCircleColor: "bg-blue-400",
     borderTextColor: "border-blue-400",
   },
   {
     difficulty: "hard",
-    profileImg: botProfileSvg,
+    profileImg: botProfileSvg3,
     text: "Hard Bot",
     bgCircleColor: "bg-red-400",
     borderTextColor: "border-red-400",
@@ -31,9 +33,11 @@ const BotDifficultySelectionPage = () => {
   const selectBotDifficulty = useGameStore(
     (state) => state.selectBotDifficulty,
   );
+  const resetGameState = useGameStore((state) => state.resetGameState);
 
   const onClick = (botDifficulty: BotDifficulty) => {
     selectBotDifficulty(botDifficulty);
+    resetGameState("single");
     navigate("/board-game");
   };
 

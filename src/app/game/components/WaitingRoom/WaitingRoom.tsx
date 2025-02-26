@@ -1,6 +1,6 @@
 import Button from "@/app/game/components/Button";
 import { toast } from "@/shared/hooks/use-toast";
-import { Copy, Loader, ShareIcon } from "lucide-react";
+import { Copy, Loader } from "lucide-react";
 
 const WaitingRoom = () => {
   const handleCopiedUrl = () => {

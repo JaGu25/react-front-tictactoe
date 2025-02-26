@@ -1,53 +1,51 @@
 import CardOption from "@/app/game/components/BoardGame/CardOption";
 import CurrentPlayer from "@/app/game/components/CurrentPlayer";
-import {
-  PlayerTurn,
-  useGameStore,
-  valuesToCheck,
-} from "@/store/game/game.store";
-import { Circle, RefreshCcw, X } from "lucide-react";
+import { useGameStore } from "@/store/game/game.store";
+import { Circle, Loader2, RefreshCcw, X } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useSocketContext } from "@/shared/providers/SocketProvider";
+import { useEffect, useState } from "react";
+import { GameModeStrategy } from "@/app/game/domain/game";
+import { LocalGameStrategy } from "@/app/game/components/BoardGame/local-game-strategy";
+import { SingleGameStrategy } from "@/app/game/components/BoardGame/single-strategy";
+import robotAnimated from "@/assets/animation/robot-saying-hello.lottie";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const BoardGame = () => {
   const { sendMessage } = useSocketContext();
   const {
+    gameMode,
     playerTurn,
     gameState,
     currentStatus,
     players: { playerOne, playerTwo },
   } = useGameStore((state) => state.gameStateBoard);
-  const {
-    updateGameState,
-    updatePlayerTurn,
-    resetGameState,
-    updateGameCurrentStatus,
-  } = useGameStore(useShallow((state) => state));
+  const { resetGameState, botDifficulty } = useGameStore(
+    useShallow((state) => state),
+  );
+  const [gameStrategy, setGameStrategy] = useState<GameModeStrategy>();
+  const isSingleModeAndIsBotTurn =
+    gameMode === "single" &&
+    playerTurn === "TWO" &&
+    currentStatus === "in-progress";
 
-  const handleClickCardOption = ({ X, Y }: { X: number; Y: number }) => {
-    sendMessage("ping", { client: "Hola" });
-    gameState[Y][X] = playerTurn;
-    updateGameState(gameState);
-    checkIsGameOver(playerTurn);
-  };
-
-  const checkIsGameOver = (playerTurn: PlayerTurn) => {
-    const someAlreadyWin = valuesToCheck.some((valueToCheck) =>
-      valueToCheck.every(([X, Y]) => gameState[X][Y] === playerTurn),
-    );
-
-    if (!someAlreadyWin) {
-      const boardFilled = gameState.flat().every((value) => value !== "");
-      if (boardFilled) {
-        return updateGameCurrentStatus("draw");
-      }
+  useEffect(() => {
+    switch (gameMode) {
+      case "local":
+        setGameStrategy(new LocalGameStrategy());
+        break;
+      case "single":
+        setGameStrategy(new SingleGameStrategy(botDifficulty));
+        break;
     }
+  }, [gameMode]);
 
-    if (someAlreadyWin) {
-      return updateGameCurrentStatus("done");
+  const onClick = ({ X, Y }: { X: number; Y: number }) => {
+    sendMessage("1", {});
+    const isNotSelected = Boolean(!gameState[Y][X]);
+    if (currentStatus === "in-progress" && isNotSelected) {
+      gameStrategy?.handleMove(X, Y);
     }
-
-    updatePlayerTurn(playerTurn === "ONE" ? "TWO" : "ONE");
   };
 
   const renderFinalText = () => {
@@ -79,13 +77,9 @@ const BoardGame = () => {
             {rows.map((value, indexY) => (
               <CardOption
                 key={value + indexY}
-                onClick={() => {
-                  const isNotSelected = Boolean(!gameState[indexY][indexX]);
-                  if (currentStatus === "in-progress" && isNotSelected) {
-                    handleClickCardOption({ X: indexX, Y: indexY });
-                  }
-                }}
+                onClick={() => onClick({ X: indexX, Y: indexY })}
                 selected={gameState[indexY][indexX]}
+                disabled={isSingleModeAndIsBotTurn}
               />
             ))}
           </div>
@@ -103,13 +97,25 @@ const BoardGame = () => {
             <div
               className="bg-secondaryGame flex justify-center items-center p-2 rounded-md border
                 border-white"
-              onClick={resetGameState}
+              onClick={() => resetGameState(gameMode)}
             >
               <RefreshCcw className="text-white" />
             </div>
           </>
         )}
       </div>
+      {isSingleModeAndIsBotTurn && (
+        <div
+          className="bg-secondaryGame flex flex-col justify-between items-center rounded-md border
+            border-white w-full -my-20 p-4 pb-0"
+        >
+          <div className="flex flex-col items-center gap-2">
+            <p>Pensando</p>
+            <Loader2 strokeWidth={3} className="animate-spin" />
+          </div>
+          <DotLottieReact src={robotAnimated} loop autoplay className="w-40" />
+        </div>
+      )}
     </>
   );
 };

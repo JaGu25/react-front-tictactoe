@@ -7,6 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 const BoardGamePage = () => {
   const { setInitialGameState } = useGameStore(useShallow((state) => state));
   const { gameMode } = useGameStore((state) => state.gameStateBoard);
+  const { botDifficulty } = useGameStore((state) => state);
 
   useEffect(() => {
     if (gameMode === "local") {
@@ -25,6 +26,20 @@ const BoardGamePage = () => {
         currentStatus: "in-progress",
       });
     } else if (gameMode === "single") {
+      setInitialGameState({
+        gameMode,
+        players: {
+          playerOne: {
+            name: "Player One",
+          },
+          playerTwo: {
+            name: `Bot ${botDifficulty}`,
+          },
+        },
+        gameState: structuredClone(initialGameState),
+        playerTurn: "ONE",
+        currentStatus: "in-progress",
+      });
     } else {
     }
   }, []);
