@@ -1,6 +1,7 @@
 import { checkIsGameOver, isGameOverSimulated } from "@/app/game/components/BoardGame/general";
 import { GameModeStrategy } from "@/app/game/domain/game";
-import { BotDifficulty, useGameStore } from "@/store/game/game.store";
+import { BotDifficulty } from "@/store/game/game-config.store";
+import { useGameStore } from "@/store/game/game.store";
 
 export class SingleGameStrategy implements GameModeStrategy {
     private difficulty;
@@ -10,20 +11,20 @@ export class SingleGameStrategy implements GameModeStrategy {
     }
 
     handleMove(X: number, Y: number) {
-        const { gameStateBoard: { gameState }, updateGameState, } = useGameStore.getState();
+        const { gameState, updateGameState, } = useGameStore.getState();
         gameState[Y][X] = "ONE";
         updateGameState(gameState);
         checkIsGameOver("ONE", gameState);
 
         setTimeout(() => {
-            const { gameStateBoard: { currentStatus } } = useGameStore.getState();
+            const { currentStatus, playerTurn } = useGameStore.getState();
             const aiMove = this.findBestMove(gameState);
-            if (aiMove && currentStatus === "in-progress") {
+            if (aiMove && currentStatus === "in-progress" && playerTurn === "TWO") {
                 gameState[aiMove.Y][aiMove.X] = "TWO";
                 updateGameState(gameState);
                 checkIsGameOver("TWO", gameState);
             }
-        }, 2000);
+        }, 1500);
     }
 
     private findBestMove(board: string[][]): { X: number; Y: number } | null {

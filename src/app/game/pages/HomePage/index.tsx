@@ -1,19 +1,20 @@
 import Button from "@/app/game/components/Button";
-import { GameMode, useGameStore } from "@/store/game/game.store";
 import clsx from "clsx";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import robotAnimated from "@/assets/animation/robot-saying-hello.lottie";
 import { Volume2, VolumeOff } from "lucide-react";
 import { useNavigate } from "react-router";
 import GameService from "@/app/game/services/game.service";
+import { GameMode, useGameConfigStore } from "@/store/game/game-config.store";
+import { useShallow } from "zustand/react/shallow";
 
 const tictactoeTitle = ["T", "I", "C", "T", "A", "C", "T", "O", "E"];
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const isSoundActivate = useGameStore((state) => state.isSoundActivate);
-  const toggleMusic = useGameStore((state) => state.toggleMusic);
-  const selectGameMode = useGameStore((state) => state.selectGameMode);
+  const { isSoundActivate, selectGameMode, toggleMusic } = useGameConfigStore(
+    useShallow((state) => state),
+  );
 
   const onClickGameMode = async (gameMode: GameMode, to: string) => {
     try {

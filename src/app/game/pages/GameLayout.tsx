@@ -4,12 +4,12 @@ import Navegation from "@/app/game/components/Navegation";
 import { usePlaySound } from "@/app/game/hooks/usePlaySound";
 import bgSound from "@/assets/sounds/bg-music.mp3";
 import { useEffect } from "react";
-import { useGameStore } from "@/store/game/game.store";
 import { SocketProvider } from "@/shared/providers/SocketProvider";
 import { ButtonSoundProvider } from "@/shared/providers/ButtonSoundProvider";
+import { useGameConfigStore } from "@/store/game/game-config.store";
 
 const GameLayout = () => {
-  const isSoundActivate = useGameStore((state) => state.isSoundActivate);
+  const isSoundActivate = useGameConfigStore((state) => state.isSoundActivate);
   const { playAudio, pauseAudio } = usePlaySound({ src: bgSound, loop: true });
   const location = useLocation();
   const showNavegation = "/" !== location.pathname;

@@ -4,7 +4,7 @@ import { useGameStore } from "@/store/game/game.store";
 
 export class LocalGameStrategy implements GameModeStrategy {
   handleMove(X: number, Y: number) {
-    const { updateGameState, gameStateBoard: { gameState, playerTurn } } = useGameStore.getState();
+    const { updateGameState, gameState, playerTurn } = useGameStore.getState();
     gameState[Y][X] = playerTurn;
     updateGameState(gameState);
     checkIsGameOver(playerTurn, gameState);

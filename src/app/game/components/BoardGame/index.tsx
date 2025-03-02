@@ -1,6 +1,5 @@
 import CardOption from "@/app/game/components/BoardGame/CardOption";
 import CurrentPlayer from "@/app/game/components/CurrentPlayer";
-import { useGameStore } from "@/store/game/game.store";
 import { Circle, Loader2, RefreshCcw, X } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useSocketContext } from "@/shared/providers/SocketProvider";
@@ -10,19 +9,17 @@ import { LocalGameStrategy } from "@/app/game/components/BoardGame/local-game-st
 import { SingleGameStrategy } from "@/app/game/components/BoardGame/single-strategy";
 import robotAnimated from "@/assets/animation/robot-saying-hello.lottie";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { useGameConfigStore } from "@/store/game/game-config.store";
+import { useGameStore } from "@/store/game/game.store";
 
 const BoardGame = () => {
   const { sendMessage } = useSocketContext();
-  const {
-    gameMode,
-    playerTurn,
-    gameState,
-    currentStatus,
-    players: { playerOne, playerTwo },
-  } = useGameStore((state) => state.gameStateBoard);
-  const { resetGameState, botDifficulty } = useGameStore(
+  const { gameMode, botDifficulty } = useGameConfigStore(
     useShallow((state) => state),
   );
+  const { resetGameState, gameState, playerTurn, currentStatus, players } =
+    useGameStore(useShallow((state) => state));
+  const [playerOne, playerTwo] = players;
   const [gameStrategy, setGameStrategy] = useState<GameModeStrategy>();
   const isSingleModeAndIsBotTurn =
     gameMode === "single" &&
@@ -50,7 +47,7 @@ const BoardGame = () => {
 
   const renderFinalText = () => {
     if (currentStatus === "done") {
-      return `Ganador ${playerTurn === "ONE" ? playerOne?.name : playerTwo?.name}`;
+      return `Ganador ${playerTurn === "ONE" ? playerOne : playerTwo}`;
     }
     if (currentStatus === "draw") {
       return "Empate !";
@@ -62,12 +59,12 @@ const BoardGame = () => {
       <div className="flex justify-between px-4">
         <CurrentPlayer
           active={playerTurn === "ONE" && currentStatus === "in-progress"}
-          playerName={playerOne?.name!}
+          playerName={playerOne}
           fillOption={<X size={60} className="text-red-500" />}
         />
         <CurrentPlayer
           active={playerTurn === "TWO" && currentStatus === "in-progress"}
-          playerName={playerTwo?.name!}
+          playerName={playerTwo}
           fillOption={<Circle size={50} className="text-yellow-400" />}
         />
       </div>
@@ -97,7 +94,7 @@ const BoardGame = () => {
             <div
               className="bg-secondaryGame flex justify-center items-center p-2 rounded-md border
                 border-white"
-              onClick={() => resetGameState(gameMode)}
+              onClick={resetGameState}
             >
               <RefreshCcw className="text-white" />
             </div>
@@ -110,8 +107,8 @@ const BoardGame = () => {
             border-white w-full -my-20 p-4 pb-0"
         >
           <div className="flex flex-col items-center gap-2">
-            <p>Pensando</p>
-            <Loader2 strokeWidth={3} className="animate-spin" />
+            <p className="text-white">Pensando</p>
+            <Loader2 strokeWidth={3} className="animate-spin text-white" />
           </div>
           <DotLottieReact src={robotAnimated} loop autoplay className="w-40" />
         </div>
