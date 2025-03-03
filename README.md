@@ -29,10 +29,10 @@ cd react-front-tictactoe
 npm install
 ```
 
-### 2. Instalar Dependencias
+### 3. Ejecutar en Desarrollo 
 
 ```bash
-npm install
+npm run dev
 ```
 
 
