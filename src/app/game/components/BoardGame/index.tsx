@@ -2,7 +2,6 @@ import CardOption from "@/app/game/components/BoardGame/CardOption";
 import CurrentPlayer from "@/app/game/components/CurrentPlayer";
 import { Circle, Loader2, RefreshCcw, X } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import { useSocketContext } from "@/shared/providers/SocketProvider";
 import { useEffect, useState } from "react";
 import { GameModeStrategy } from "@/app/game/domain/game";
 import { LocalGameStrategy } from "@/app/game/components/BoardGame/local-game-strategy";
@@ -11,19 +10,22 @@ import robotAnimated from "@/assets/animation/robot-saying-hello.lottie";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useGameConfigStore } from "@/store/game/game-config.store";
 import { useGameStore } from "@/store/game/game.store";
+import { MultiplayerStrategy } from "@/app/game/components/BoardGame/multiplayer-strategy";
+import { useSocketContext } from "@/shared/providers/SocketProvider";
 
 const BoardGame = () => {
-  const { sendMessage } = useSocketContext();
   const { gameMode, botDifficulty } = useGameConfigStore(
     useShallow((state) => state),
   );
-  const { resetGameState, gameState, playerTurn, currentStatus, players } =
-    useGameStore(useShallow((state) => state));
+  const { gameState, playerTurn, currentStatus, players } = useGameStore(
+    useShallow((state) => state),
+  );
+  const { playerPlay, resetGame } = useSocketContext();
   const [playerOne, playerTwo] = players;
   const [gameStrategy, setGameStrategy] = useState<GameModeStrategy>();
   const isSingleModeAndIsBotTurn =
     gameMode === "single" &&
-    playerTurn === "TWO" &&
+    playerTurn === playerTwo &&
     currentStatus === "in-progress";
 
   useEffect(() => {
@@ -34,20 +36,26 @@ const BoardGame = () => {
       case "single":
         setGameStrategy(new SingleGameStrategy(botDifficulty));
         break;
+      case "multiplayer":
+        setGameStrategy(new MultiplayerStrategy({ playerPlay, resetGame }));
+        break;
     }
   }, [gameMode]);
 
   const onClick = ({ X, Y }: { X: number; Y: number }) => {
-    sendMessage("1", {});
     const isNotSelected = Boolean(!gameState[Y][X]);
     if (currentStatus === "in-progress" && isNotSelected) {
       gameStrategy?.handleMove(X, Y);
     }
   };
 
+  const onResetGameState = () => {
+    gameStrategy?.resetGameState();
+  };
+
   const renderFinalText = () => {
     if (currentStatus === "done") {
-      return `Ganador ${playerTurn === "ONE" ? playerOne : playerTwo}`;
+      return `Ganador ${playerTurn.slice(0, 10)}`;
     }
     if (currentStatus === "draw") {
       return "Empate !";
@@ -58,13 +66,13 @@ const BoardGame = () => {
     <>
       <div className="flex justify-between px-4">
         <CurrentPlayer
-          active={playerTurn === "ONE" && currentStatus === "in-progress"}
-          playerName={playerOne}
+          active={playerTurn === playerOne && currentStatus === "in-progress"}
+          playerName={playerOne.slice(0, 10)}
           fillOption={<X size={60} className="text-red-500" />}
         />
         <CurrentPlayer
-          active={playerTurn === "TWO" && currentStatus === "in-progress"}
-          playerName={playerTwo}
+          active={playerTurn === playerTwo && currentStatus === "in-progress"}
+          playerName={playerTwo.slice(0, 10)}
           fillOption={<Circle size={50} className="text-yellow-400" />}
         />
       </div>
@@ -75,6 +83,7 @@ const BoardGame = () => {
               <CardOption
                 key={value + indexY}
                 onClick={() => onClick({ X: indexX, Y: indexY })}
+                players={players}
                 selected={gameState[indexY][indexX]}
                 disabled={isSingleModeAndIsBotTurn}
               />
@@ -94,7 +103,7 @@ const BoardGame = () => {
             <div
               className="bg-secondaryGame flex justify-center items-center p-2 rounded-md border
                 border-white"
-              onClick={resetGameState}
+              onClick={onResetGameState}
             >
               <RefreshCcw className="text-white" />
             </div>

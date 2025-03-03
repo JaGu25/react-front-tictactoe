@@ -27,10 +27,7 @@ const GameLayout = () => {
         <div className="z-10 h-full w-full tracking-wide">
           {showNavegation && <Navegation />}
           <ButtonSoundProvider>
-            <SocketProvider
-              url={import.meta.env.VITE_APP_SOCKET_URL!}
-              roomId="test"
-            >
+            <SocketProvider url={import.meta.env.VITE_APP_SOCKET_URL!}>
               <Outlet />
             </SocketProvider>
           </ButtonSoundProvider>

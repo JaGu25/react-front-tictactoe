@@ -1,25 +1,27 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
+import { checkIsGameOver } from "@/app/game/components/BoardGame/general";
+import { SocketErrors } from "@/app/game/domain/errors";
+import { GameCurrentStatus, useGameStore } from "@/store/game/game.store";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 
+export interface GameStateRequest {
+  players: string[];
+  gameState: string[][];
+  playerTurn: string;
+  currentStatus: GameCurrentStatus;
+}
 interface SocketContextType {
   socket: Socket | null;
   connected: boolean;
-  players: string[];
   error: string | null;
-  sendMessage: (event: string, data: any) => void;
-  listenEvent: (event: string, callback: (data: any) => void) => void;
+  joinRoom: (data: { roomId: string; userId: string }) => void;
+  playerPlay: (data: { roomId: string; gameState: GameStateRequest }) => void;
+  resetGame: (roomId: string) => void;
 }
 
 interface SocketProviderProps {
   children: React.ReactNode;
   url: string;
-  roomId: string;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -35,19 +37,17 @@ export const useSocketContext = (): SocketContextType => {
 export const SocketProvider: React.FC<SocketProviderProps> = ({
   children,
   url,
-  roomId,
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState<boolean>(false);
-  const [players, setPlayers] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { setInitialGameState, updateGameState, updateFullGame } =
+    useGameStore();
 
   useEffect(() => {
     const socketInstance = io(url);
 
     setSocket(socketInstance);
-
-    socketInstance.emit("joinRoom", roomId);
 
     socketInstance.on("connect", () => {
       setConnected(true);
@@ -57,53 +57,75 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       setConnected(false);
     });
 
-    socketInstance.on("roomFull", (message: string) => {
-      setError(message);
-    });
-
-    socketInstance.on(
-      "playerJoined",
-      (data: { playerId: string; players: string[] }) => {
-        setPlayers(data.players);
-      },
-    );
-
-    socketInstance.on("playerLeft", (playerId: string) => {
-      setPlayers((prevPlayers) => prevPlayers.filter((id) => id !== playerId));
-    });
+    socketInstance.on("exception", (error) => handleError(error));
 
     return () => {
       socketInstance.disconnect();
     };
-  }, [url, roomId]);
+  }, [url]);
 
-  const sendMessage = useCallback(
-    (event: string, data: any) => {
-      if (socket && connected) {
-        socket.emit(event, data);
-      }
-    },
-    [socket, connected],
-  );
-
-  const listenEvent = useCallback(
-    (event: string, callback: (data: any) => void) => {
-      if (socket) {
-        socket.on(event, callback);
-      }
+  useEffect(() => {
+    if (socket && connected) {
+      socket.on("gameStart", handleGameStart);
+      socket.on("roomUpdate", handleRoomUpdate);
+      socket.on("gameUpdated", handleGameUpdated);
+      socket.on("updateFullGame", handleUpdateFullGame);
 
       return () => {
-        if (socket) {
-          socket.off(event, callback);
-        }
+        socket.off("gameStart", handleGameStart);
+        socket.off("roomUpdate", handleRoomUpdate);
+        socket.off("gameUpdated", handleGameUpdated);
+        socket.on("updateFullGame", handleUpdateFullGame);
       };
-    },
-    [socket],
-  );
+    }
+  }, [socket, connected]);
+
+  const joinRoom = (data: { roomId: string; userId: string }) => {
+    if (socket && connected) {
+      socket.emit("joinRoom", data);
+    }
+  };
+
+  const playerPlay = (data: {
+    roomId: string;
+    gameState: GameStateRequest;
+  }) => {
+    if (socket && connected) {
+      socket.emit("playerPlay", data);
+    }
+  };
+
+  const resetGame = (roomId: string) => {
+    if (socket && connected) {
+      socket.emit("resetGameState", { roomId });
+    }
+  };
+
+  const handleGameStart = (data: any) => {
+    setInitialGameState(data.gameState.players, data.gameState.gameState);
+  };
+
+  const handleRoomUpdate = (data: any) => {
+    setInitialGameState(data.gameState.players);
+  };
+
+  const handleUpdateFullGame = (data: GameStateRequest) => {
+    updateFullGame(data);
+  };
+
+  const handleError = ({ code }: { code: SocketErrors }) => {
+    setError(code);
+  };
+
+  const handleGameUpdated = (data: GameStateRequest) => {
+    const { gameState, playerTurn } = data;
+    updateGameState(gameState);
+    checkIsGameOver(playerTurn, gameState);
+  };
 
   return (
     <SocketContext.Provider
-      value={{ socket, connected, players, error, sendMessage, listenEvent }}
+      value={{ socket, connected, error, playerPlay, joinRoom, resetGame }}
     >
       {children}
     </SocketContext.Provider>

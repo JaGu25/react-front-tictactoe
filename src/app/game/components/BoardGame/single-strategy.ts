@@ -4,27 +4,33 @@ import { BotDifficulty } from "@/store/game/game-config.store";
 import { useGameStore } from "@/store/game/game.store";
 
 export class SingleGameStrategy implements GameModeStrategy {
-    private difficulty;
+    private difficulty: BotDifficulty;
 
     constructor(difficulty: BotDifficulty) {
         this.difficulty = difficulty;
     }
 
     handleMove(X: number, Y: number) {
-        const { gameState, updateGameState, } = useGameStore.getState();
-        gameState[Y][X] = "ONE";
+        const { gameState, updateGameState, players } = useGameStore.getState();
+        const [playerOne, playerTwo] = players;
+        gameState[Y][X] = playerOne;
         updateGameState(gameState);
-        checkIsGameOver("ONE", gameState);
+        checkIsGameOver(playerOne, gameState);
 
         setTimeout(() => {
             const { currentStatus, playerTurn } = useGameStore.getState();
             const aiMove = this.findBestMove(gameState);
-            if (aiMove && currentStatus === "in-progress" && playerTurn === "TWO") {
-                gameState[aiMove.Y][aiMove.X] = "TWO";
+            if (aiMove && currentStatus === "in-progress" && playerTurn === playerTwo) {
+                gameState[aiMove.Y][aiMove.X] = playerTwo;
                 updateGameState(gameState);
-                checkIsGameOver("TWO", gameState);
+                checkIsGameOver(playerTwo, gameState);
             }
         }, 1500);
+    }
+
+    resetGameState(): void {
+        const { resetGameState } = useGameStore.getState();
+        resetGameState();
     }
 
     private findBestMove(board: string[][]): { X: number; Y: number } | null {
@@ -34,7 +40,7 @@ export class SingleGameStrategy implements GameModeStrategy {
             case "medium":
                 return this.getDefensiveMove(board) || this.getRandomMove(board);
             case "hard":
-                return this.minimax(board, "TWO").move;
+                return this.minimax(board, useGameStore.getState().players[1]).move;
             default:
                 return this.getRandomMove(board);
         }
@@ -51,11 +57,12 @@ export class SingleGameStrategy implements GameModeStrategy {
     }
 
     private getDefensiveMove(board: string[][]): { X: number; Y: number } | null {
+        const [playerOne] = useGameStore.getState().players;
         for (let Y = 0; Y < board.length; Y++) {
             for (let X = 0; X < board[Y].length; X++) {
                 if (board[Y][X] === "") {
-                    board[Y][X] = "ONE";
-                    const isWinningMove = isGameOverSimulated("ONE", board) === "win";
+                    board[Y][X] = playerOne;
+                    const isWinningMove = isGameOverSimulated(playerOne, board) === "win";
                     board[Y][X] = "";
                     if (isWinningMove) return { X, Y };
                 }
@@ -64,14 +71,15 @@ export class SingleGameStrategy implements GameModeStrategy {
         return null;
     }
 
-    private minimax(board: string[][], player: "ONE" | "TWO", depth = 0): { score: number; move: { X: number; Y: number } | null } {
-        const opponent = player === "TWO" ? "ONE" : "TWO";
+    private minimax(board: string[][], player: string, depth = 0): { score: number; move: { X: number; Y: number } | null } {
+        const [playerOne, playerTwo] = useGameStore.getState().players;
+        const opponent = player === playerTwo ? playerOne : playerTwo;
 
         const result = isGameOverSimulated(player, board);
-        if (result === "win") return { score: player === "TWO" ? 10 - depth : depth - 10, move: null };
+        if (result === "win") return { score: player === playerTwo ? 10 - depth : depth - 10, move: null };
         if (result === "draw") return { score: 0, move: null };
 
-        let bestScore = player === "TWO" ? -Infinity : Infinity;
+        let bestScore = player === playerTwo ? -Infinity : Infinity;
         let bestMove: { X: number; Y: number } | null = null;
 
         for (let Y = 0; Y < board.length; Y++) {
@@ -81,7 +89,7 @@ export class SingleGameStrategy implements GameModeStrategy {
                     const score = this.minimax(board, opponent, depth + 1).score;
                     board[Y][X] = "";
 
-                    if ((player === "TWO" && score > bestScore) || (player === "ONE" && score < bestScore)) {
+                    if ((player === playerTwo && score > bestScore) || (player === playerOne && score < bestScore)) {
                         bestScore = score;
                         bestMove = { X, Y };
                     }

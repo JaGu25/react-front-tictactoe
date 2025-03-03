@@ -1,3 +1,4 @@
+import { GameStateRequest } from "@/shared/providers/SocketProvider";
 import { create, StateCreator } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -9,30 +10,29 @@ export const initialGameState = [
     ["", "", ""],
 ];
 
-export type PlayerTurn = "ONE" | "TWO"
-
 export interface Player {
     name: string;
 }
 export interface GameState {
     players: string[];
     gameState: string[][];
-    playerTurn: PlayerTurn;
+    playerTurn: string;
     currentStatus: GameCurrentStatus;
-    setInitialGameState: (players: string[]) => void;
+    setInitialGameState: (players: string[], gameState?: string[][]) => void;
     updateGameState: (gameState: string[][]) => void;
     updateGameCurrentStatus: (currentStatus: GameCurrentStatus) => void;
     resetGameState: () => void;
-    updatePlayerTurn: (playerTurn: PlayerTurn) => void;
+    updatePlayerTurn: (playerTurn: string) => void;
+    updateFullGame: (gameStateRequest: GameStateRequest) => void;
 }
 
 export const storeApi: StateCreator<GameState> = (set, get) => ({
-    players: ["", ""],
+    players: [],
     currentStatus: "in-progress",
     gameState: structuredClone(initialGameState),
-    playerTurn: "ONE",
-    setInitialGameState: (players) => {
-        set({ gameState: structuredClone(initialGameState), players })
+    playerTurn: "",
+    setInitialGameState: (players, gameState = structuredClone(initialGameState)) => {
+        set({ gameState, players, playerTurn: players[0] })
     },
     updateGameState: (gameState) => {
         set({ gameState })
@@ -44,7 +44,11 @@ export const storeApi: StateCreator<GameState> = (set, get) => ({
         set({ playerTurn })
     },
     resetGameState: () => {
-        set({ gameState: structuredClone(initialGameState), currentStatus: "in-progress", playerTurn: "ONE" })
+        const [playerOne] = get().players;
+        set({ gameState: structuredClone(initialGameState), currentStatus: "in-progress", playerTurn: playerOne })
+    },
+    updateFullGame: (gameStateRequest: GameStateRequest) => {
+        set({ ...gameStateRequest })
     }
 })
 

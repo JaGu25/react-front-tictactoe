@@ -51,6 +51,7 @@ const BotDifficultySelectionPage = () => {
       <div className="flex items-center flex-col space-y-[70px] mt-10">
         {difficultyOptions.map((option) => (
           <DifficultyOptions
+            key={option.difficulty}
             onClick={() => onClick(option.difficulty as BotDifficulty)}
             {...option}
           />

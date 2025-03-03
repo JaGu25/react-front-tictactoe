@@ -1,4 +1,4 @@
-import { PlayerTurn, useGameStore } from "@/store/game/game.store";
+import { useGameStore } from "@/store/game/game.store";
 
 const valuesToCheck = [
     [
@@ -43,8 +43,9 @@ const valuesToCheck = [
     ],
 ];
 
-export const checkIsGameOver = (playerTurn: PlayerTurn, gameState: string[][]) => {
-    const { updateGameCurrentStatus, updatePlayerTurn } = useGameStore.getState();
+export const checkIsGameOver = (playerTurn: string, gameState: string[][]) => {
+    const { updateGameCurrentStatus, updatePlayerTurn, players } = useGameStore.getState();
+    const [playerOne, playerTwo] = players;
 
     const someAlreadyWin = valuesToCheck.some((valueToCheck) =>
         valueToCheck.every(([X, Y]) => gameState[X][Y] === playerTurn),
@@ -61,11 +62,11 @@ export const checkIsGameOver = (playerTurn: PlayerTurn, gameState: string[][]) =
         return updateGameCurrentStatus("done");
     }
 
-    updatePlayerTurn(playerTurn === "ONE" ? "TWO" : "ONE");
+    updatePlayerTurn(playerTurn === playerOne ? playerTwo : playerOne);
 };
 
 
-export const isGameOverSimulated = (playerTurn: PlayerTurn, gameState: string[][]): "win" | "draw" | "ongoing" => {
+export const isGameOverSimulated = (playerTurn: string, gameState: string[][]): "win" | "draw" | "ongoing" => {
     const someAlreadyWin = valuesToCheck.some((valueToCheck) =>
         valueToCheck.every(([X, Y]) => gameState[X][Y] === playerTurn)
     );

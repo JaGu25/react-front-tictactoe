@@ -9,4 +9,9 @@ export class LocalGameStrategy implements GameModeStrategy {
     updateGameState(gameState);
     checkIsGameOver(playerTurn, gameState);
   }
+
+  resetGameState() {
+    const { resetGameState } = useGameStore.getState();
+    resetGameState();
+  }
 }

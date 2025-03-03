@@ -1,11 +1,11 @@
-import { useGameStore } from "@/store/game/game.store";
+import { useGameConfigStore } from "@/store/game/game-config.store";
 import { ArrowLeft, Volume2, VolumeOff } from "lucide-react";
 import { useNavigate } from "react-router";
 
 const Navegation = () => {
   const navigate = useNavigate();
-  const isSoundActivate = useGameStore((state) => state.isSoundActivate);
-  const toggleMusic = useGameStore((state) => state.toggleMusic);
+  const isSoundActivate = useGameConfigStore((state) => state.isSoundActivate);
+  const toggleMusic = useGameConfigStore((state) => state.toggleMusic);
 
   return (
     <div className="flex justify-between items-center w-full">

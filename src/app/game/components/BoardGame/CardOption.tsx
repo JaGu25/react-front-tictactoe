@@ -5,9 +5,17 @@ interface Props {
   onClick: () => void;
   selected: string;
   disabled: boolean;
+  players: string[];
 }
 
-const CardOption: React.FC<Props> = ({ onClick, selected, disabled }) => {
+const CardOption: React.FC<Props> = ({
+  onClick,
+  selected,
+  disabled,
+  players,
+}) => {
+  const [playerOne, playerTwo] = players;
+
   return (
     <div
       onClick={onClick}
@@ -16,8 +24,10 @@ const CardOption: React.FC<Props> = ({ onClick, selected, disabled }) => {
         disabled && "pointer-events-none",
       )}
     >
-      {selected == "ONE" && <X size={80} className="text-red-500" />}
-      {selected == "TWO" && <Circle size={65} className="text-yellow-400" />}
+      {selected == playerOne && <X size={80} className="text-red-500" />}
+      {selected == playerTwo && (
+        <Circle size={65} className="text-yellow-400" />
+      )}
     </div>
   );
 };
