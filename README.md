@@ -14,13 +14,6 @@ Este es el repositorio frontend de la aplicación **Tic-Tac-Toe**, construida co
 
 ---
 
-## Estructura de Carpetas
-
-src ├── app │ ├── admin │ ├── auth │ ├── game │ │ ├── components │ │ ├── domain │ │ ├── hooks │ │ ├── pages │ │ ├── routes │ │ └── services ├── assets ├── routes ├── shared ├── store ├── App.tsx ├── main.tsx ├── index.css └── vite-env.d.ts
-
-
----
-
 ## Instalación y Ejecución
 
 ### 1. Clonar el repositorio
@@ -42,9 +35,10 @@ npm install
 npm install
 ```
 
-MIT License
 
-Copyright (c) Meta Platforms, Inc. and affiliates.
+# MIT License
+
+## Copyright (c) Meta Platforms, Inc. and affiliates.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
