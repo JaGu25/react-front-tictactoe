@@ -2,11 +2,18 @@ import Button from "@/app/game/components/Button";
 import { SocketErrors } from "@/app/game/domain/errors";
 import { toast } from "@/shared/hooks/use-toast";
 import { useSocketContext } from "@/shared/providers/SocketProvider";
+import { copyToClipBoard } from "@/shared/utils/clipBoard";
 import { Copy, Loader } from "lucide-react";
+import { useLocation } from "react-router";
 
 const WaitingRoom = () => {
   const { error } = useSocketContext();
-  const handleCopiedUrl = () => {
+  const location = useLocation();
+  const roomId = new URLSearchParams(location.search).get("id") || "";
+
+  const handleCopiedUrl = async () => {
+    await copyToClipBoard(`${window.location.origin}/board-game?id=${roomId}`);
+
     toast({
       title: "Enlace copiado",
       variant: "success",
